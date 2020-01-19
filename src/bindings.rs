@@ -15,11 +15,11 @@ const FT_OPEN_MASK: i32 = FT_OPEN_BY_SERIAL_NUMBER | FT_OPEN_BY_DESCRIPTION | FT
 
 // FT_LIST_DEVICES FLAGS
 // used with FT_OpenEx Flags
-const FT_LIST_NUMBER_ONLY: i32 = 0x80000000;
-const FT_LIST_BY_INDEX: i32 = 0x40000000;
-const FT_LIST_ALL: i32 = 0x20000000;
+const FT_LIST_NUMBER_ONLY: i64 = 0x80000000;
+const FT_LIST_BY_INDEX: i64 = 0x40000000;
+const FT_LIST_ALL: i64 = 0x20000000;
 
-const FT_LIST_MASK: i32 = FT_LIST_NUMBER_ONLY | FT_LIST_BY_INDEX | FT_LIST_ALL;
+const FT_LIST_MASK: i64 = FT_LIST_NUMBER_ONLY | FT_LIST_BY_INDEX | FT_LIST_ALL;
 
 // BAUD RATES
 const FT_BAUD_300: i32 = 300;
@@ -64,7 +64,7 @@ const FT_PURGE_TX: i32 = 2;
 
 // events
 // TODO: check callback
-type PFT_EVEN_HANDLER = *mut c_void(c_ulong, c_ulong);
+//type PFT_EVEN_HANDLER = *mut c_void(c_ulong, c_ulong);
 
 const FT_EVENT_RXCHAR: i32 = 1;
 const FT_EVENT_MODEM_STATUS: i32 = 2;
