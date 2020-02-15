@@ -1,4 +1,4 @@
-use std::os::raw::{c_ulong, c_char, c_void, c_uchar};
+use std::os::raw::{c_ulong, c_char, c_void, c_uchar, c_ushort, c_uint};
 use std::ffi::CString;
 
 // #[allow(non_camel_case_types)]
@@ -165,6 +165,386 @@ const FT_X_SERIES_CBUS_KEEP_AWAKE: i32 = 0x15;	//
 const FT_DRIVER_TYPE_D2XX: i32 = 0;
 const FT_DRIVER_TYPE_VCP: i32 = 1;
 
+#[link(name="ftd2xx", kind="dylib")]
+extern "C" {
+    fn FT_Initialise(
+        pvoid: c_void,
+    ) -> FT_STATUS;
+
+    fn FT_Finalise(
+        pvoid: c_void
+    ) -> c_void;
+
+    fn FT_Open(
+        device_number: i32,
+        p_handle: *mut FT_HANDLE
+    ) -> FT_STATUS;
+
+    fn FT_OpenEx(
+        parg: *mut c_void,
+        flags: c_ulong,
+        phandle: *mut FT_HANDLE
+    ) -> FT_STATUS;
+
+    fn FT_ListDevices(
+        parg1: *mut c_void,
+        parg2: *mut c_void,
+        flags: c_ulong
+    ) -> FT_STATUS;
+
+    fn FT_Close(
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+
+    fn FT_Read(
+        handle: FT_HANDLE,
+        lpbuffer: *mut c_void,
+        bytes_to_read: c_ulong,
+        bytes_returned: *mut c_ulong
+    ) -> FT_STATUS;
+
+    pub fn FT_Write(
+        handle: FT_HANDLE,
+        lpbuffer: *mut c_void,
+        bytes_to_write: c_ulong,
+        bytes_written: *mut c_ulong
+    ) -> FT_STATUS;
+
+/*
+    pub fn FT_IoCtl(
+        handle: FT_HANDLE,
+        io_control_code: c_ulong,
+        in_buffer: *mut c_void,
+        in_buffer_size: c_ulong,
+        out_buffer: *mut c_void,
+        out_buffer_size: c_ulong,
+        bytes_returned: *mut c_void,
+        overlapped: *mut OVERLAPPED
+    ) -> FT_STATUS;
+*/
+
+    pub fn FT_SetBaudRate(
+        handle: FT_HANDLE,
+        baud_rate: c_ulong
+    ) -> FT_STATUS;
+
+    pub fn FT_SetDivisor(
+        handle: FT_HANDLE,
+        divisor: c_ushort
+    ) -> FT_STATUS;
+
+    pub fn FT_SetDataCharacteristics(
+        handle: FT_HANDLE,
+        word_length: c_uchar,
+        stop_bits: c_uchar,
+        parity: c_uchar
+    ) -> FT_STATUS;
+
+    pub fn FT_SetFlowControl(
+        handle: FT_HANDLE,
+        flow_control: c_ushort,
+        x_on_char: c_uchar,
+        x_off_char: c_uchar
+    ) -> FT_STATUS;
+
+    pub fn FT_ResetDevice(
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+
+    pub fn FT_SetDtr(
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+
+    pub fn FT_ClrDtr(
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+
+    pub fn FT_SetRts(
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+
+    pub fn FT_ClrRts(
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+
+    pub fn FT_GetModemStatus(
+        handle: FT_HANDLE,
+        modem_status: *mut c_ulong
+    ) -> FT_STATUS;
+
+    pub fn FT_SetChars(
+        handle: FT_HANDLE,
+        event_char: c_uchar,
+        event_char_enabled: c_uchar,
+        error_char: c_uchar,
+        error_char_enabled: c_char
+    ) -> FT_STATUS;
+
+    pub fn FT_Purge(
+        handle: FT_HANDLE,
+        mask: c_ulong
+    );
+
+    pub fn FT_SetTimeouts(
+        handle: FT_HANDLE,
+        read_timeout: c_ulong,
+        write_timeout: c_ulong
+    ) -> FT_STATUS;
+
+    pub fn GT_GetQueueStatus(
+        handle: FT_HANDLE,
+        rx_bytes: *mut c_ulong
+    ) -> FT_STATUS;
+
+    pub fn FT_SetEventNotification(
+        handle: FT_HANDLE,
+        mask: c_ulong,
+        param: *mut c_void
+    ) -> FT_STATUS;
+
+    pub fn FT_GetStatus(
+        handle: FT_HANDLE,
+        rx_bytes: *mut c_ulong,
+        tx_bytes: *mut c_ulong,
+        event_dword: *mut c_ulong
+    ) -> FT_STATUS;
+
+    pub fn FT_SetBreakOn(
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+
+    pub fn FT_SetBreakOff(
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+
+    pub fn FT_SetWaitMask(
+        handle: FT_HANDLE,
+        mask: c_ulong
+    ) -> FT_STATUS;
+
+    pub fn FT_WaitOnMask(
+        handle: FT_HANDLE,
+        mask: *mut c_ulong
+    ) -> FT_STATUS;
+
+    pub fn FT_GetEventStatus(
+        handle: FT_HANDLE,
+        event_dword: *mut c_ulong
+    ) -> FT_STATUS;
+
+    pub fn FT_ReadEE(
+        handle: FT_HANDLE,
+        word_offset: c_ulong,
+        value: *mut c_ulong
+    ) -> FT_STATUS;
+
+    pub fn FT_WriteEE(
+        handle: FT_HANDLE,
+        word_offset: c_ulong,
+        value: c_uint
+    ) -> FT_STATUS;
+
+    pub fn FT_EraseEE(
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+}
+
+#[repr(C)]
+pub struct FT_PROGRAM_DATA {
+    Signature1: c_ulong,			// Header - must be 0x00000000 
+    Signature2: c_ulong,			// Header - must be 0xffffffff
+    Version: c_ulong,				// Header - FT_PROGRAM_DATA version
+    //			0 = original
+    //			1 = FT2232 extensions
+    //			2 = FT232R extensions
+    //			3 = FT2232H extensions
+    //			4 = FT4232H extensions
+    //			5 = FT232H extensions
+
+    VendorId: c_uint,				// 0x0403
+    ProductId: c_uint,				// 0x6001
+    Manufacturer: *mut char,			// "FTDI"
+    ManufacturerId: *mut char,		// "FT"
+    Description: *mut char,			// "USB HS Serial Converter"
+    SerialNumber: *mut char,			// "FT000001" if fixed, or NULL
+    MaxPower: c_uint,				// 0 < MaxPower <= 500
+    PnP: c_uint,					// 0 = disabled, 1 = enabled
+    SelfPowered: c_uint,			// 0 = bus powered, 1 = self powered
+    RemoteWakeup: c_uint,			// 0 = not capable, 1 = capable
+    //
+    // Rev4 (FT232B) extensions
+    //
+    Rev4: c_uchar,					// non-zero if Rev4 chip, zero otherwise
+    IsoIn: c_uchar,				// non-zero if in endpoint is isochronous
+    IsoOut: c_uchar,				// non-zero if out endpoint is isochronous
+    PullDownEnable: c_uchar,		// non-zero if pull down enabled
+    SerNumEnable: c_uchar,			// non-zero if serial number to be used
+    USBVersionEnable: c_uchar,		// non-zero if chip uses USBVersion
+    USBVersion: c_uchar,			// BCD (0x0200 => USB2)
+    //
+    // Rev 5 (FT2232) extensions
+    //
+    Rev5: c_uchar,					// non-zero if Rev5 chip, zero otherwise
+    IsoInA: c_uchar,				// non-zero if in endpoint is isochronous
+    IsoInB: c_uchar,				// non-zero if in endpoint is isochronous
+    IsoOutA: c_uchar,				// non-zero if out endpoint is isochronous
+    IsoOutB: c_uchar,				// non-zero if out endpoint is isochronous
+    PullDownEnable5: c_uchar,		// non-zero if pull down enabled
+    SerNumEnable5: c_uchar,		// non-zero if serial number to be used
+    USBVersionEnable5: c_uchar,	// non-zero if chip uses USBVersion
+    USBVersion5: c_uchar,			// BCD (0x0200 => USB2)
+    AIsHighCurrent: c_uchar,		// non-zero if interface is high current
+    BIsHighCurrent: c_uchar,		// non-zero if interface is high current
+    IFAIsFifo: c_uchar,			// non-zero if interface is 245 FIFO
+    IFAIsFifoTar: c_uchar,			// non-zero if interface is 245 FIFO CPU target
+    IFAIsFastSer: c_uchar,			// non-zero if interface is Fast serial
+    AIsVCP: c_uchar,				// non-zero if interface is to use VCP drivers
+    IFBIsFifo: c_uchar,			// non-zero if interface is 245 FIFO
+    IFBIsFifoTar: c_uchar,			// non-zero if interface is 245 FIFO CPU target
+    IFBIsFastSer: c_uchar,			// non-zero if interface is Fast serial
+    BIsVCP: c_uchar,				// non-zero if interface is to use VCP drivers
+    //
+    // Rev 6 (FT232R) extensions
+    //
+    UseExtOsc: c_uchar,			// Use External Oscillator
+    HighDriveIOs: c_uchar,			// High Drive I/Os
+    EndpointSize: c_uchar,			// Endpoint size
+    PullDownEnableR: c_uchar,		// non-zero if pull down enabled
+    SerNumEnableR: c_uchar,		// non-zero if serial number to be used
+    InvertTXD: c_uchar,			// non-zero if invert TXD
+    InvertRXD: c_uchar,			// non-zero if invert RXD
+    InvertRTS: c_uchar,			// non-zero if invert RTS
+    InvertCTS: c_uchar,			// non-zero if invert CTS
+    InvertDTR: c_uchar,			// non-zero if invert DTR
+    InvertDSR: c_uchar,			// non-zero if invert DSR
+    InvertDCD: c_uchar,			// non-zero if invert DCD
+    InvertRI: c_uchar,				// non-zero if invert RI
+    Cbus0: c_uchar,				// Cbus Mux control
+    Cbus1: c_uchar,				// Cbus Mux control
+    Cbus2: c_uchar,				// Cbus Mux control
+    Cbus3: c_uchar,				// Cbus Mux control
+    Cbus4: c_uchar,				// Cbus Mux control
+    RIsD2XX: c_uchar,				// non-zero if using D2XX driver
+    //
+    // Rev 7 (FT2232H) Extensions
+    //
+    PullDownEnable7: c_uchar,		// non-zero if pull down enabled
+    SerNumEnable7: c_uchar,		// non-zero if serial number to be used
+    ALSlowSlew: c_uchar,			// non-zero if AL pins have slow slew
+    ALSchmittInput: c_uchar,		// non-zero if AL pins are Schmitt input
+    ALDriveCurrent: c_uchar,		// valid values are 4mA, 8mA, 12mA, 16mA
+    AHSlowSlew: c_uchar,			// non-zero if AH pins have slow slew
+    AHSchmittInput: c_uchar,		// non-zero if AH pins are Schmitt input
+    AHDriveCurrent: c_uchar,		// valid values are 4mA, 8mA, 12mA, 16mA
+    BLSlowSlew: c_uchar,			// non-zero if BL pins have slow slew
+    BLSchmittInput: c_uchar,		// non-zero if BL pins are Schmitt input
+    BLDriveCurrent: c_uchar,		// valid values are 4mA, 8mA, 12mA, 16mA
+    BHSlowSlew: c_uchar,			// non-zero if BH pins have slow slew
+    BHSchmittInput: c_uchar,		// non-zero if BH pins are Schmitt input
+    BHDriveCurrent: c_uchar,		// valid values are 4mA, 8mA, 12mA, 16mA
+    IFAIsFifo7: c_uchar,			// non-zero if interface is 245 FIFO
+    IFAIsFifoTar7: c_uchar,		// non-zero if interface is 245 FIFO CPU target
+    IFAIsFastSer7: c_uchar,		// non-zero if interface is Fast serial
+    AIsVCP7: c_uchar,				// non-zero if interface is to use VCP drivers
+    IFBIsFifo7: c_uchar,			// non-zero if interface is 245 FIFO
+    IFBIsFifoTar7: c_uchar,		// non-zero if interface is 245 FIFO CPU target
+    IFBIsFastSer7: c_uchar,		// non-zero if interface is Fast serial
+    BIsVCP7: c_uchar,				// non-zero if interface is to use VCP drivers
+    PowerSaveEnable: c_uchar,		// non-zero if using BCBUS7 to save power for self-powered designs
+    //
+    // Rev 8 (FT4232H) Extensions
+    //
+    PullDownEnable8: c_uchar,		// non-zero if pull down enabled
+    SerNumEnable8: c_uchar,		// non-zero if serial number to be used
+    ASlowSlew: c_uchar,			// non-zero if A pins have slow slew
+    ASchmittInput: c_uchar,		// non-zero if A pins are Schmitt input
+    ADriveCurrent: c_uchar,		// valid values are 4mA, 8mA, 12mA, 16mA
+    BSlowSlew: c_uchar,			// non-zero if B pins have slow slew
+    BSchmittInput: c_uchar,		// non-zero if B pins are Schmitt input
+    BDriveCurrent: c_uchar,		// valid values are 4mA, 8mA, 12mA, 16mA
+    CSlowSlew: c_uchar,			// non-zero if C pins have slow slew
+    CSchmittInput: c_uchar,		// non-zero if C pins are Schmitt input
+    CDriveCurrent: c_uchar,		// valid values are 4mA, 8mA, 12mA, 16mA
+    DSlowSlew: c_uchar,			// non-zero if D pins have slow slew
+    DSchmittInput: c_uchar,		// non-zero if D pins are Schmitt input
+    DDriveCurrent: c_uchar,		// valid values are 4mA, 8mA, 12mA, 16mA
+    ARIIsTXDEN: c_uchar,			// non-zero if port A uses RI as RS485 TXDEN
+    BRIIsTXDEN: c_uchar,			// non-zero if port B uses RI as RS485 TXDEN
+    CRIIsTXDEN: c_uchar,			// non-zero if port C uses RI as RS485 TXDEN
+    DRIIsTXDEN: c_uchar,			// non-zero if port D uses RI as RS485 TXDEN
+    AIsVCP8: c_uchar,				// non-zero if interface is to use VCP drivers
+    BIsVCP8: c_uchar,				// non-zero if interface is to use VCP drivers
+    CIsVCP8: c_uchar,				// non-zero if interface is to use VCP drivers
+    DIsVCP8: c_uchar,				// non-zero if interface is to use VCP drivers
+    //
+    // Rev 9 (FT232H) Extensions
+    //
+    PullDownEnableH: c_uchar,		// non-zero if pull down enabled
+    SerNumEnableH: c_uchar,		// non-zero if serial number to be used
+    ACSlowSlewH: c_uchar,			// non-zero if AC pins have slow slew
+    ACSchmittInputH: c_uchar,		// non-zero if AC pins are Schmitt input
+    ACDriveCurrentH: c_uchar,		// valid values are 4mA, 8mA, 12mA, 16mA
+    ADSlowSlewH: c_uchar,			// non-zero if AD pins have slow slew
+    ADSchmittInputH: c_uchar,		// non-zero if AD pins are Schmitt input
+    ADDriveCurrentH: c_uchar,		// valid values are 4mA, 8mA, 12mA, 16mA
+    Cbus0H: c_uchar,				// Cbus Mux control
+    Cbus1H: c_uchar,				// Cbus Mux control
+    Cbus2H: c_uchar,				// Cbus Mux control
+    Cbus3H: c_uchar,				// Cbus Mux control
+    Cbus4H: c_uchar,				// Cbus Mux control
+    Cbus5H: c_uchar,				// Cbus Mux control
+    Cbus6H: c_uchar,				// Cbus Mux control
+    Cbus7H: c_uchar,				// Cbus Mux control
+    Cbus8H: c_uchar,				// Cbus Mux control
+    Cbus9H: c_uchar,				// Cbus Mux control
+    IsFifoH: c_uchar,				// non-zero if interface is 245 FIFO
+    IsFifoTarH: c_uchar,			// non-zero if interface is 245 FIFO CPU target
+    IsFastSerH: c_uchar,			// non-zero if interface is Fast serial
+    IsFT1248H: c_uchar,			// non-zero if interface is FT1248
+    FT1248CpolH: c_uchar,			// FT1248 clock polarity - clock idle high (1) or clock idle low (0)
+    FT1248LsbH: c_uchar,			// FT1248 data is LSB (1) or MSB (0)
+    FT1248FlowControlH: c_uchar,	// FT1248 flow control enable
+    IsVCPH: c_uchar,				// non-zero if interface is to use VCP drivers
+    PowerSaveEnableH: c_uchar,		// non-
+}
+
+#[link(name="ftd2xx", kind="dylib")]
+extern "C" {
+    pub fn FT_EE_Program(
+        handle: FT_HANDLE,
+        data: *mut FT_PROGRAM_DATA
+    ) -> FT_STATUS;
+
+    pub fn FT_EE_ProgramEx(
+        handle: FT_HANDLE,
+        data: *mut FT_PROGRAM_DATA,
+        manufacturer: *mut c_char,
+        manufacturer_id: *mut c_char,
+        description: *mut c_char,
+        serial_number: *mut c_char
+    ) -> FT_STATUS;
+
+    pub fn FT_EE_Read(
+        handle: FT_HANDLE,
+        data: *mut FT_PROGRAM_DATA
+    ) -> FT_STATUS;
+
+    pub fn FT_EE_ReadEx(
+        handle: FT_HANDLE,
+        data: *mut FT_PROGRAM_DATA,
+        manufacturer: *mut c_char,
+        manufacturer_id: *mut c_char,
+        description: *mut c_char,
+        serial_number: *mut c_char
+    ) -> FT_STATUS;
+
+    pub fn FT_EE_UASize(
+        handle: FT_HANDLE,
+        size: *mut c_ulong
+    ) -> FT_STATUS;
+}
+
+
 #[repr(C)]
 #[allow(dead_code, non_camel_case_types)]
 enum FT_STATUS_ENUM {
@@ -192,7 +572,7 @@ enum FT_STATUS_ENUM {
 }
 
 #[repr(C)]
-struct FT_DEVICE_LIST_INFO_NODE {
+pub struct FT_DEVICE_LIST_INFO_NODE {
     flags: c_ulong,
     ttype: c_ulong,
     id: c_ulong,
@@ -209,27 +589,23 @@ enum FT_FLAGS {
 }
 
 // #[allow(dead_code)]
+#[link(name="ftd2xx", kind="dylib")]
 extern "C" {
-    fn FT_SetVIDPID(
+    pub fn FT_SetVIDPID(
         dw_vid: c_ulong,
-        dw_pid: c_ulong) -> FT_STATUS;
-}
+        dw_pid: c_ulong
+    ) -> FT_STATUS;
 
-extern "C" {
-    fn FT_GetVIDPID(
+    pub fn FT_GetVIDPID(
         pdw_vid: *mut c_ulong,
         pdw_pid: *mut c_ulong
     ) -> FT_STATUS;
-}
 
-extern "C" {
-    fn FT_CreateDeviceInfoList(
+    pub fn FT_CreateDeviceInfoList(
         lpdw_num_devs: *mut c_ulong
     ) -> FT_STATUS;
-}
 
-extern "C" {
-    fn FT_GetDeviceInfoList(
+    pub fn FT_GetDeviceInfoList(
         p_dest: *mut FT_DEVICE_LIST_INFO_NODE,
         lpdw_num_devs: *mut c_ulong
     ) -> FT_STATUS;

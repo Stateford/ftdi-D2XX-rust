@@ -3,7 +3,14 @@ name = "ftdi-D2XX-rust"
 version = "0.1.0"
 authors = ["Dimitri Apostal <idietmoran@gmail.com>"]
 edition = "2018"
+rustc-link-search = ["./lib"]
+rustc-link-lib = ["ftd2xx"]
+# root = "C:\\Users\\japos\\github\\rust\\ftdi-D2XX-rust"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+static = []
+dynamic = []
 
 [dependencies]
