@@ -5,6 +5,9 @@ use std::ffi::CString;
 type FT_STATUS = c_ulong;
 type FT_HANDLE = *mut c_void;
 
+type DWORD = c_ulong;
+type WORD = c_uint;
+
 // FT_OPENEX FLAGS
 
 const FT_OPEN_BY_SERIAL_NUMBER: i32 = 1;
@@ -542,8 +545,156 @@ extern "C" {
         handle: FT_HANDLE,
         size: *mut c_ulong
     ) -> FT_STATUS;
+
+    pub fn FT_EE_UAWrite(
+        handle: FT_HANDLE,
+        data: *mut c_uchar,
+        data_len: c_ulong
+    ) -> FT_STATUS;
+
+    pub fn FT_EE_UARead(
+        handle: FT_HANDLE,
+        data: *mut c_uchar,
+        data_len: DWORD,
+        bytes_read: *mut DWORD
+    ) -> FT_STATUS;
+
+
 }
 
+#[repr(C)]
+struct ft_eeprom_header {
+    device_type: FT_DEVICE,
+    vendor_id: WORD,
+    product_id: WORD,
+    serial_number_enable: c_uchar,
+    max_power: WORD,
+    self_powered: c_uchar,
+    remote_wakeup: c_uchar,
+    pull_down_enable: c_uchar
+}
+
+type FT_EEPROM_HEADER = ft_eeprom_header;
+type PFT_EEPROM_HEADER = *mut ft_eeprom_header;
+
+#[repr(C)]
+struct ft_eeprom_232b {
+    common: FT_EEPROM_HEADER
+}
+
+type FT_EEPROM_232B = ft_eeprom_232b;
+type PFT_EEPROM_232B = *mut ft_eeprom_232b; 
+
+
+#[repr(C)]
+struct ft_eeprom_2232 {
+    common: FT_EEPROM_HEADER,
+    a_is_high_current: c_uchar,
+    b_is_high_current: c_uchar,
+    
+    a_is_fifo: c_uchar,
+    a_is_fifo_tar: c_uchar,
+    a_is_fast_ser: c_char,
+
+    b_is_fifo: c_uchar,
+    b_is_fifo_tar: c_uchar,
+    b_is_fast_ser: c_char,
+
+    a_driver_type: c_uchar,
+    b_driver_type: c_char
+}
+
+type FT_EEPROM_2232 = ft_eeprom_2232;
+type PFT_EEPROM_2232 = *mut ft_eeprom_2232;
+
+#[repr(C)]
+struct ft_eeprom_232r {
+    common: FT_EEPROM_HEADER,
+    is_high_current: c_uchar,
+    use_ext_osc: c_uchar,
+    invert_txd: c_uchar,
+    invert_rxd: c_uchar,
+    invert_rts: c_uchar,
+    invert_cts: c_uchar,
+    invert_dtr: c_uchar,
+    invert_dsr: c_uchar,
+    invert_dcd: c_uchar,
+    invert_ri: c_uchar,
+    c_bus_0: c_uchar,
+    c_bus_1: c_uchar,
+    c_bus_2: c_uchar,
+    c_bus_3: c_uchar,
+    c_bus_4: c_uchar,
+    driver_type: c_uchar
+}
+
+type FT_EEPROM_232R = ft_eeprom_232r;
+type PFT_EEPROM_232R = *mut ft_eeprom_232r;
+
+
+#[repr(C)]
+struct ft_eeprom_2232h {
+    common: FT_EEPROM_HEADER,
+    al_slow_slew: c_uchar,
+    al_schmitt_input: c_uchar,
+    al_drive_current: c_uchar,
+    ah_slow_slew: c_uchar,
+    ah_drive_current: c_uchar,
+    bl_slow_slew: c_uchar,
+    bl_schmitt_input: c_uchar,
+    bl_drive_current: c_uchar,
+    bh_slow_slew: c_uchar,
+    bh_schmitt_input: c_uchar,
+    bh_drive_current: c_uchar,
+
+    a_is_fifo: c_uchar,
+    a_is_fifo_tar: c_uchar,
+    a_is_fast_ser: c_uchar,
+    b_is_fifo: c_uchar,
+    b_is_fifo_tar: c_uchar,
+    b_is_fast_ser: c_uchar,
+    power_save_enable: c_uchar,
+
+    a_driver_type: c_uchar,
+    b_driver_type: c_uchar
+}
+
+type FT_EEPROM_2232H = ft_eeprom_2232h;
+type PFT_EEPROM_2232H = *mut ft_eeprom_2232h;
+
+#[repr(C)]
+struct ft_eeprom_4232h {
+    common: FT_EEPROM_HEADER,
+
+    a_slow_slew: c_uchar,
+    a_schmitt_input: c_uchar,
+    a_drive_current: c_uchar,
+
+    b_slow_slew: c_uchar,
+    b_schmitt_input: c_uchar,
+    b_drive_current: c_uchar,
+
+    c_slow_slew: c_uchar,
+    c_schmitt_input: c_uchar,
+    c_drive_current: c_uchar,
+
+    d_slow_slew: c_uchar,
+    d_schmitt_input: c_uchar,
+    d_drive_current: c_uchar,
+
+    ariis_tx_den: c_uchar,
+    briis_tx_den: c_uchar,
+    criis_tx_den: c_uchar,
+    driis_tx_den: c_uchar,
+
+    a_driver_type: c_uchar,
+    b_driver_type: c_uchar,
+    c_driver_type: c_uchar,
+    d_driver_type: c_uchar
+}
+
+type FT_EEPROM_4232H = ft_eeprom_4232h;
+type PFT_EEPROM_4232H = *mut ft_eeprom_4232h;
 
 #[repr(C)]
 #[allow(dead_code, non_camel_case_types)]
