@@ -1,4 +1,4 @@
-use std::os::raw::{c_ulong, c_char, c_void, c_uchar, c_ushort, c_uint};
+use std::os::raw::{c_ulong, c_char, c_void, c_uchar, c_ushort, c_uint, c_long};
 use std::ffi::CString;
 
 // #[allow(non_camel_case_types)]
@@ -558,8 +558,6 @@ extern "C" {
         data_len: DWORD,
         bytes_read: *mut DWORD
     ) -> FT_STATUS;
-
-
 }
 
 #[repr(C)]
@@ -696,6 +694,149 @@ struct ft_eeprom_4232h {
 type FT_EEPROM_4232H = ft_eeprom_4232h;
 type PFT_EEPROM_4232H = *mut ft_eeprom_4232h;
 
+
+#[repr(C)]
+struct ft_eeprom_232h {
+    common: FT_EEPROM_HEADER,
+    ac_slow_slew: c_uchar,
+    ac_schmitt_input: c_uchar,
+    ac_drive_current: c_uchar,
+    ad_slow_slew: c_uchar,
+    ad_schmitt_input: c_uchar,
+    ad_drive_current: c_uchar,
+
+    cbus0: c_uchar,
+    cbus1: c_uchar,
+    cbus2: c_uchar,
+    cbus3: c_uchar,
+    cbus4: c_uchar,
+    cbus5: c_uchar,
+    cbus6: c_uchar,
+    cbus7: c_uchar,
+    cbus8: c_uchar,
+    cbus9: c_uchar,
+
+    ft1248_cpol: c_uchar,
+    ft1248_lsb: c_uchar,
+    ft1248_flow_control: c_uchar,
+
+    is_fifo: c_uchar,
+    is_fifo_tar: c_uchar,
+    is_fast_ser: c_uchar,
+    is_ft1248: c_uchar,
+    power_save_enable: c_uchar,
+
+    driver_type: c_uchar
+}
+
+type FT_EEPROM_232H = ft_eeprom_232h;
+type PFT_EEPROM_232H = *mut ft_eeprom_232h;
+
+#[repr(C)]
+struct ft_eeprom_x_series {
+    common: FT_EEPROM_HEADER,
+
+    ac_slow_slew: c_uchar,
+    ac_schmitt_input: c_uchar,
+    ac_drive_current: c_uchar,
+    ad_slow_slew: c_uchar,
+    ad_schmitt_input: c_uchar,
+    ad_drive_current: c_uchar,
+
+    cbus0: c_uchar,
+    cbus1: c_uchar,
+    cbus2: c_uchar,
+    cbus3: c_uchar,
+    cbus4: c_uchar,
+    cbus5: c_uchar,
+    cbus6: c_uchar,
+
+    invert_txd: c_uchar,
+    invert_rxd: c_uchar,
+    invert_rts: c_uchar,
+    invert_cts: c_uchar,
+    invert_dtr: c_uchar,
+    invert_dsr: c_uchar,
+    invert_dcd: c_uchar,
+    invert_ri: c_uchar,
+
+    bcd_enable: c_uchar,
+    bcd_force_cbus_pwr_en: c_uchar,
+    bcd_disable_sleep: c_uchar,
+
+    i2c_slace_address: WORD,
+    i2c_device_id: DWORD,
+    i2c_disable_schmitt: c_uchar,
+
+    ft1248_cpol: c_uchar,
+    ft1248_lsb: c_uchar,
+    ft1248_flow_control: c_uchar,
+
+    rs485_echo_suppress: c_uchar,
+    power_save_enable: c_uchar,
+
+    driver_type: c_uchar
+}
+
+type FT_EEPROM_X_SERIES = ft_eeprom_x_series;
+type PFT_EEPROM_X_SERIES = *mut ft_eeprom_x_series;
+
+#[link(name="ftd2xx", kind="dylib")]
+extern "C" {
+    pub fn FT_EEPROM_Read(
+        ft_handle: FT_HANDLE,
+        eeprom_data: *mut c_void,
+        eeprom_data_size: DWORD,
+        manufacturer: *mut c_char,
+        manufacturer_id: *mut c_char,
+        description: *mut c_char,
+        serial_number: *mut c_char
+    ) -> FT_STATUS;
+
+    pub fn FT_EEPROM_Program(
+        ft_handle: FT_HANDLE,
+        eeprom_data: *mut c_void,
+        eeprom_data_size: DWORD,
+        manufacturer: *mut c_char,
+        manufacturer_id: *mut c_char,
+        description: *mut c_char,
+        serial_number: *mut c_char
+    ) -> FT_STATUS;
+
+    pub fn FT_SetLatencyTimer(
+        handle: FT_HANDLE,
+        latency: c_uchar
+    ) -> FT_STATUS;
+
+    pub fn FT_GetLatencyTimer(
+        handle: FT_HANDLE,
+        latency: *mut c_uchar
+    ) -> FT_STATUS;
+
+    pub fn FT_SetBitMode(
+        handle: FT_HANDLE,
+        mask: c_uchar,
+        enable: c_uchar
+    ) -> FT_STATUS;
+
+    pub fn FT_GetBitMode(
+        handle: FT_HANDLE,
+        mode: *mut c_uchar
+    ) -> FT_STATUS;
+
+    pub fn FT_SetUSBParameters(
+        handle: FT_HANDLE,
+        in_transfer_size: c_ulong,
+        out_transfer_size: c_ulong
+    ) -> FT_STATUS;
+
+    pub fn FT_SetDeadmanTimeout(
+        handle: FT_HANDLE,
+        deadman_timeout: c_ulong
+    ) -> FT_STATUS;
+}
+
+
 #[repr(C)]
 #[allow(dead_code, non_camel_case_types)]
 enum FT_STATUS_ENUM {
@@ -743,13 +884,18 @@ enum FT_FLAGS {
 #[link(name="ftd2xx", kind="dylib")]
 extern "C" {
     pub fn FT_SetVIDPID(
-        dw_vid: c_ulong,
-        dw_pid: c_ulong
+        vid: DWORD,
+        pid: DWORD
     ) -> FT_STATUS;
 
     pub fn FT_GetVIDPID(
-        pdw_vid: *mut c_ulong,
-        pdw_pid: *mut c_ulong
+        vid: *mut DWORD,
+        pid: *mut DWORD
+    ) -> FT_STATUS;
+
+    pub fn FT_GetDeviceLocId(
+        handle: FT_HANDLE,
+        loc_id: *mut DWORD
     ) -> FT_STATUS;
 
     pub fn FT_CreateDeviceInfoList(
@@ -759,5 +905,126 @@ extern "C" {
     pub fn FT_GetDeviceInfoList(
         p_dest: *mut FT_DEVICE_LIST_INFO_NODE,
         lpdw_num_devs: *mut c_ulong
+    ) -> FT_STATUS;
+
+    pub fn FT_GetDeviceInfoDetail(
+        index: DWORD,
+        flags: *mut DWORD,
+        dw_type: *mut DWORD,
+        id: *mut DWORD,
+        loc_id: *mut DWORD,
+        serial_number: *mut c_void,
+        description: *mut c_void,
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+
+    pub fn FT_GetDriverVersion(
+        handle: FT_HANDLE,
+        version: *mut DWORD
+    ) -> FT_STATUS;
+
+    pub fn FT_GetLibraryVersion(
+        version: *mut DWORD
+    ) -> FT_STATUS;
+
+    pub fn FT_Rescan() -> FT_STATUS;
+
+    pub fn FT_Reload(
+        vid: WORD,
+        pid: WORD
+    ) -> FT_STATUS;
+
+    pub fn FT_GetComPortNumber(
+        handle: FT_HANDLE,
+        com_port_number: *mut c_long
+    ) -> FT_STATUS;
+
+    pub fn FT_EE_ReadConfig(
+        handle: FT_HANDLE,
+        address: c_uchar,
+        value: *mut c_uchar
+    ) -> FT_STATUS;
+
+    pub fn FT_EE_WriteConfig(
+        handle: FT_HANDLE,
+        address: c_uchar,
+        value: c_uchar
+    ) -> FT_STATUS;
+
+    pub fn FT_EE_ReadECC(
+        handle: FT_HANDLE,
+        options: c_uchar,
+        value: *mut WORD
+    ) -> FT_STATUS;
+
+    pub fn FT_GetQueueStatusEx(
+        handle: FT_HANDLE,
+        rx_bytes: *mut DWORD
+    ) -> FT_STATUS;
+
+    pub fn FT_ComPortIdle(
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+
+    pub fn FT_ComPortCancelIdle(
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+
+    pub fn FT_VendorCmdGet(
+        handle: FT_HANDLE,
+        request: c_uchar,
+        buf: *mut c_uchar,
+        len: c_ushort
+    ) -> FT_STATUS;
+
+    pub fn FT_VendorCmdSet(
+        handle: FT_HANDLE,
+        request: c_uchar,
+        buf: *mut c_uchar,
+        len: c_ushort
+    ) -> FT_STATUS;
+
+    pub fn FT_VendorCmdGetEx(
+        handle: FT_HANDLE,
+        value: c_ushort,
+        buf: *mut c_uchar,
+        len: c_ushort
+    ) -> FT_STATUS;
+    
+    pub fn FT_VendorCmdSetEx(
+        handle: FT_HANDLE,
+        value: c_ushort,
+        buf: *mut c_uchar,
+        len: c_ushort
+    ) -> FT_STATUS;
+
+    pub fn FT_GetDeviceInfo(
+        handle: FT_HANDLE,
+        device: *mut FT_DEVICE,
+        id: *mut DWORD,
+        serial_number: *mut c_char,
+        description: *mut c_char,
+        dummy: *mut c_void
+    ) -> FT_STATUS;
+
+    pub fn FT_StopInTask(
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+
+    pub fn FT_RestartInTask(
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+
+    pub fn FT_SetResetPipeRetryCount(
+        handle: FT_HANDLE,
+        count: DWORD
+    ) -> FT_STATUS;
+
+    pub fn FT_ResetPort(
+        handle: FT_HANDLE
+    ) -> FT_STATUS;
+
+    pub fn FT_CyclePort(
+        handle: FT_HANDLE
     ) -> FT_STATUS;
 }
